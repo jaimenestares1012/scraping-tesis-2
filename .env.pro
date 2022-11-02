@@ -1,0 +1,13 @@
+CONFIG_PATH=${HOME}/.config/foo
+DOMAIN=example.org
+EMAIL=admin@${DOMAIN}
+URL_SD1=http://10.3.3.122
+URL_MONGO=mongodb://192.168.4.186:27017
+codigoArchivoUrl=https://workflow.pe/apiacr/file?co_arcadj={}&idf=y
+readpdf=http://192.168.44.180:7654
+vurl='https://workflow.pe/apiacr/file?co_arcadj={}&idf=y'
+webdriver=http://10.1.1.101:4444/wd/hub
+#webdriver=http://192.168.54.215:4444/wd/hub
+URL_BASE64=http://192.168.4.251:5014/ms/uploadfileJS/v1.0/uploadbase64
+ENVIRO=Produccion
+arcadjEnDuro=6150901

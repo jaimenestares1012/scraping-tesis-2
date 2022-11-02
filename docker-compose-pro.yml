@@ -1,0 +1,10 @@
+# docker-compose.yml
+version: "3"
+services:
+  scraper-sunarp-py:
+    # container_name: scraper-sunarp-py
+    image: scrapper-sunarp-py:1.3
+#      build: .
+    command: python3 main.py pro
+    ports:
+      - "5000:5000"

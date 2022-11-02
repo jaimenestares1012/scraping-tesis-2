@@ -1,0 +1,28 @@
+# docker-compose.yml
+version: "3"
+services:
+  app:
+    image: registry.devacceso.com/${IMAGENAME}:${CI_PIPELINE_ID}
+    build: .
+    command: python -u main.py ${ENVDEPLOY}
+    ports:
+      - "5000:5000"
+    extra_hosts:
+      -  'workflow.pe:10.3.3.112'
+      -  'api.acr.pe:192.168.4.224'
+      -  'api.acceso.com.pe:192.168.4.161'
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.name == dev
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://192.168.4.239:12201"
+        tag: ${IMAGENAME}
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro

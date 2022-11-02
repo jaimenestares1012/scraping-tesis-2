@@ -1,0 +1,54 @@
+image: tiangolo/docker-with-compose
+
+before_script:
+  - docker login registry.devacceso.com --username=docker -p=peladonerd
+
+variables:
+    PORTDOCKER: 5000
+    PORTSALIDA: 5000
+    IMAGENAME: sc-sunarp-py
+    DOCKER_STACK: sc-sunarp-py
+
+stages:
+  - build
+  - deploy-to-dev
+  - build-to-pro
+
+build:
+  stage: build
+  tags:
+    - build
+  only:
+    - develop
+  variables:
+    ENVDEPLOY: development
+  script:
+    - docker-compose build
+    - docker-compose push
+
+deploy-to-dev:
+  stage: deploy-to-dev
+  only:
+    - develop
+  tags:
+    - swarm-dev
+  variables:
+    ENVDEPLOY: dev
+    NODO: dev
+  script:
+      - docker stack deploy -c docker-compose.yml $DOCKER_STACK --with-registry-auth
+
+build-to-pro:
+  stage: build-to-pro
+  only:
+    - master
+  tags:
+    - build
+  variables:
+    IMAGENAME: sc-sunarp-py
+    ENVDEPLOY: pro
+  script:
+    # - docker build -f ./buildDocker/production.DockerFile -t ${IMAGENAME} .
+    - docker build -t ${IMAGENAME} .
+    - docker tag ${IMAGENAME} registry.devacceso.com/${IMAGENAME}:${CI_PIPELINE_ID}
+    - docker push registry.devacceso.com/${IMAGENAME}:${CI_PIPELINE_ID}
