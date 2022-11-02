@@ -46,64 +46,87 @@ class reportingMetro():
     
         self.driver.get(self.objs)
         self.driver.maximize_window()
-        
-        
+
+
+
         try:
-            time.sleep(5)
-            self.wait.until(ec.presence_of_element_located((By.XPATH, '/html/body/div[5]/div/div[3]/button[1]')))
-            self.driver.find_element(By.XPATH, "/html/body/div[5]/div/div[3]/button[1]").click()
-            time.sleep(5)
+            print("click cookis")
+            self.wait.until(ec.presence_of_element_located((By.XPATH, '/html/body/div[29]/div/div[3]/button[1]')))
+            self.driver.find_element(By.XPATH, "/html/body/div[29]/div/div[3]/button[1]").click()
+            print("fin click")
         except:
+            print("ERROR cookis")
+            time.sleep(2)
+        
+
+        try:
+            print("click modal")
+            self.wait.until(ec.presence_of_element_located((By.XPATH, '/html/body/div[30]/div/div/div[2]/button[2]')))
+            self.driver.find_element(By.XPATH, "/html/body/div[30]/div/div/div[2]/button[2]").click()
+            print("fin click ")
+        except:
+            print("ERRO modal")
             time.sleep(2)
 
 
-            
-        
 
         # self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
-        # print("4")
         # repeticion = ""
-        # estado = self.driver.find_element(By.XPATH, "/html/body/div[2]").get_attribute('style')
+        # estado = self.driver.find_element(By.XPATH, "/html/body/div[26]/div/div[2]/div[7]/div[1]").get_attribute('style')
         # repeticion = estado.split()[1]
-        # print("repeticion", repeticion)
         # while repeticion != "none;":
         #     self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
         #     time.sleep(1)
         #     self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
-        #     estado = self.driver.find_element(By.XPATH, "/html/body/div[2]").get_attribute('style')
+        #     estado = self.driver.find_element(By.XPATH, "/html/body/div[26]/div/div[2]/div[7]/div[1]").get_attribute('style')
         #     repeticion = estado.split()[1]
-        #     print("repeticion", repeticion, type(repeticion))
         #     if repeticion == "none;":
         #         self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
         #         time.sleep(1)
         #         self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
-        #         estado = self.driver.find_element(By.XPATH, "/html/body/div[2]").get_attribute('style')
+        #         estado = self.driver.find_element(By.XPATH, "/html/body/div[26]/div/div[2]/div[7]/div[1]").get_attribute('style')
         #         repeticion = estado.split()[1]
-        #     print("repeticion", repeticion, type(repeticion))
-        #     print(repeticion != "none;")
-        
-
-       
+        # print("FIN DE BAJAR")
+        # print("<------------------------------------------------------>")
 
         
-        soup = BeautifulSoup(self.driver.page_source, 'html.parser')
-        
-        dom = etree.HTML(str(soup))
-        productos = dom.xpath("/html/body/div[25]/div/div[2]/div[8]/div[2]/div[2]/div[2]/div/ul/li")
+        productos = self.driver.find_elements(By.XPATH, "/html/body/div[26]/div/div[2]/div[7]/div[2]/div[2]/div[2]/div/ul/li")
+        print(productos, len(productos))
+
+
         for producto in productos:
-            print("producto",producto)
-            Nombre = producto.xpath('./div')
-            print("Nombre",Nombre)
+            try:
+                url = producto.find_element(By.XPATH, './div').get_attribute('data-uri')
+                data_id = producto.find_element(By.XPATH, './div').get_attribute('data-id')
+                data_sku = producto.find_element(By.XPATH, './div').get_attribute('data-sku')
+                marca = producto.find_element(By.XPATH, './div').get_attribute('data-brand')
+                print("url", url)
+                print("data_id", data_id)
+                print("data_sku", data_sku)
+                print("marca", marca)
+
+                # last = 99999
+                # nombre = producto.find_element(By.XPATH, './section/a/article/div[3]/h3/span').text
+                # cantidad = producto.find_elements(By.XPATH, './section/a/article/div')
+                # if len(cantidad) == 9:
+                #     print("nombre", nombre)
+                #     precio = producto.find_element(By.XPATH, './section/a/article/div[6]/div').text
+                #     precio = " ".join(precio.split())
+                #     print("precio", precio)
+
+                # if len(cantidad) == 8:
+                #     print("nombre", nombre)
+                #     precio = producto.find_element(By.XPATH, './section/a/article/div[6]').text
+                #     precio = " ".join(precio.split())
+                #     print("precio", precio)
+               
+                # numeral = numeral + 1   
+            except: Exception
+
+
         
-        # print(soup)
-        # filtro1 = soup.find('div', {'class': 'product-shelf n18colunas'})
-        # print("feiltro1", filtro1)
-        # productos = filtro1.find_all('li', {'class': 'frutas-y-verduras'})
 
 
-        # 
-
-        # /html/body/div[25]/div/div[2]/div[8]/div[2]/div[2]/div[2]/div/ul
         return 0
         
       

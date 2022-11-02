@@ -20,7 +20,7 @@ from datetime import datetime
 
 from palenca import reportingPalenca
 
-from bcrp import reportingMetro
+from metro import reportingMetro
 
 # client = MongoClient()
 # mongo = MongoClient(os.getenv("URL_MONGO"))
