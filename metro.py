@@ -109,26 +109,26 @@ class reportingMetro():
 
 
 
-        # self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
-        # repeticion = ""
-        # estado = self.driver.find_element(By.XPATH, "/html/body/div[26]/div/div[2]/div[7]/div[1]").get_attribute('style')
-        # repeticion = estado.split()[1]
-        # while repeticion != "none;":
-        #     self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
-        #     time.sleep(1)
-        #     self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
-        #     estado = self.driver.find_element(By.XPATH, "/html/body/div[26]/div/div[2]/div[7]/div[1]").get_attribute('style')
-        #     repeticion = estado.split()[1]
-        #     print("bajando")
-        #     if repeticion == "none;":
-        #         self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
-        #         time.sleep(1)
-        #         self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
-        #         estado = self.driver.find_element(By.XPATH, "/html/body/div[26]/div/div[2]/div[7]/div[1]").get_attribute('style')
-        #         repeticion = estado.split()[1]
-        #         print("bajando sigue")
-        # print("FIN DE BAJAR")
-        # print("<------------------------------------------------------>")
+        self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+        repeticion = ""
+        estado = self.driver.find_element(By.XPATH, "/html/body/div[26]/div/div[2]/div[7]/div[1]").get_attribute('style')
+        repeticion = estado.split()[1]
+        while repeticion != "none;":
+            self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+            time.sleep(1)
+            self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+            estado = self.driver.find_element(By.XPATH, "/html/body/div[26]/div/div[2]/div[7]/div[1]").get_attribute('style')
+            repeticion = estado.split()[1]
+            print("bajando")
+            if repeticion == "none;":
+                self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+                time.sleep(1)
+                self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+                estado = self.driver.find_element(By.XPATH, "/html/body/div[26]/div/div[2]/div[7]/div[1]").get_attribute('style')
+                repeticion = estado.split()[1]
+                print("bajando sigue")
+        print("FIN DE BAJAR")
+        print("<------------------------------------------------------>")
 
         
         productos = self.driver.find_elements(By.XPATH, "/html/body/div[26]/div/div[2]/div[7]/div[2]/div[2]/div[2]/div/ul/li")
