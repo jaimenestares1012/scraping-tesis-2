@@ -17,15 +17,50 @@ from selenium.webdriver.support import expected_conditions as ec
 from pymongo import MongoClient
 
 
-client = MongoClient("mongodb+srv://user_jaime:XhA7pqTDWKfQy6Nh@micluster.pns9q58.mongodb.net/cafeDB")
-db  = client.get_database("cafeDB")
-print("<---------------------------------------------------------------------->")
+client = MongoClient("mongodb+srv://user_jaime:XhA7pqTDWKfQy6Nh@micluster.pns9q58.mongodb.net")
 
-def InsertarMongo(valor):
-    print("EN INSERTAR")
-    id = db.prueba.insert_one(valor)
-    print("Seguardo correctamente")
-    return id
+db  = client.get_database("tesis-won")
+
+def BuscarMongo(coleccion ,valor):
+    col = db[coleccion]
+    try:
+        id = col.find_one({"_id": valor})
+        print("id", id)
+        return id
+    except NameError:
+        print("ERROR")
+        print(NameError)
+
+def UpdateMongo(coleccion, valor, fechaExtraccionclean):
+    col = db[coleccion]
+    try:
+        col.update_one({
+            "_id": valor["_id"]
+        },{
+            "$set":{
+                "_id":valor["_id"],
+                "url": valor["url"],
+                fechaExtraccionclean: valor[fechaExtraccionclean], 
+            }
+        }, upsert=True)
+        print("Se actualizo correctamente")
+        return True
+    except NameError:
+        print("ERROR")
+        print(NameError)
+        return False
+
+
+def InsertarMongo(coleccion ,valor):
+    col = db[coleccion]
+    try:
+        print("InsertarMongo", valor)
+        id = col.insert_one(valor)
+        print("Seguardo correctamente")
+        return id
+    except NameError:
+        print("ERROR")
+        print(NameError)
 
 class reportingPalenca():
     def __init__(self, objs):
@@ -51,7 +86,6 @@ class reportingPalenca():
             time.sleep(2)
 
 
-            
         numer= self.driver.find_element(By.XPATH, "/html/body/div[2]/div/div[1]/div/div[2]/div/div/section/div[2]/div/div/div/div[3]/section/div/div[2]/div/div/div/div/div[1]/div/div/div/div/div/div[3]/div/span").text
 
         asea = numer.split(' ')
@@ -68,64 +102,91 @@ class reportingPalenca():
             c=c+1   
                                                         
         productos = self.driver.find_elements(By.XPATH, "/html/body/div[2]/div/div[1]/div/div[2]/div/div/section/div[2]/div/div/div/div[4]/div/div[2]/div/div[2]/div/div/div/div/div")
-        # print("productos")                               /html/body/div[2]/div/div[1]/div/div[2]/div/div/section/div[2]/div/div/div/div[4]/div/div[2]/div/div[2]/div/div/div/div
-                                                        #  /html/body/div[2]/div/div[1]/div/div[2]/div/div/section/div[2]/div/div/div/div[4]/div/div[2]/div/div[2]/div/div/div/div/div
 
         print(productos, len(productos))  
         abriendo = self.objs
-        # fechaDateTime = datetime.now()
-        # date_time_str = fechaDateTime.strftime("%Y-%m-%d %H:%M:%S")
-        # print('DateTime String:', date_time_str)
+        fechaDateTime = datetime.now()
+        fechaExtraccion = fechaDateTime.strftime("%Y-%m-%d %H:%M:%S")
+        fechaExtraccion2 = fechaExtraccion.split(" ")
+        fechaExtraccionclean = fechaExtraccion2[0]
         cadena = abriendo.split("/")
-        tienda = cadena[3]
-        categoia = cadena[4]
-        subcategoria = cadena[5]
-        numeral  = 1   
+        tienda = cadena[2]
+        categoria = cadena[3]
+        subcategoria = ""
+        try: 
+            subcategoria = cadena[4]
+        except:
+            subcategoria = "Sin subcategoria"
         json = 0
         print("<----------------------------------------->")
         for producto in productos:
-            print("Producto : ",  numeral)
+            nombre = ""
+            url = ""
+            precio = ""
             try:
                 url = producto.find_element(By.XPATH, './section/a').get_attribute('href')
-                last = 99999
+                # print(url)
+                last = "0"
                 try:
                     x = url.split("/")
                     nyc = x[3]
                     final = nyc.split("-")
                     last = final.pop()
+                    last2 = final.pop()
                 except:
                     print("error")
                 nombre = producto.find_element(By.XPATH, './section/a/article/div[3]/h3/span').text
                 cantidad = producto.find_elements(By.XPATH, './section/a/article/div')
-                if len(cantidad) == 9:
-                    print("nombre", nombre)
-                    precio = producto.find_element(By.XPATH, './section/a/article/div[6]/div').text
+                # print("cantidad", len(cantidad))
+                if len(cantidad) == 10:
+                    # print("nombre", nombre)
+                    precio = producto.find_element(By.XPATH, './section/a/article/div[7]/div').text
                     precio = " ".join(precio.split())
-                    print("precio", precio)
+                    # print("precio", precio)
 
-                if len(cantidad) == 8:
-                    print("nombre", nombre)
+                if len(cantidad) == 9:
+                    # print("nombre", nombre)
                     precio = producto.find_element(By.XPATH, './section/a/article/div[6]').text
                     precio = " ".join(precio.split())
-                    print("precio", precio)
-                json = {
-                    "_id": last,
-                    "url": url, 
-                    "nombre": nombre, 
-                    "precio": precio,
-                    "tienda": tienda,
-                    # "fecha": fechaExtraccion,
-                    "categoia": categoia,
-                    "subcategoria": subcategoria
-                }
-                print("json", json)
-                guardad = InsertarMongo(json)
-                print(guardad)
-                numeral = numeral + 1   
-            except: Exception
+                    # print("precio", precio)
+                if len(last) == 1:
+                    json = {
+                        "_id": last2,
+                        "url": url, 
+                        "nombre": nombre, 
+                        "tienda": tienda,
+                        fechaExtraccionclean : precio,
+                        "categoria": categoria,
+                        "subcategoria": subcategoria
+                    }
 
-        self.driver.quit()
-        return json
+                    busqueda  = BuscarMongo(categoria, last2)
+                    respuesta = "null"
+                    if busqueda:
+                        respuesta  = UpdateMongo(categoria,json, fechaExtraccionclean)
+                    else:
+                        respuesta  = InsertarMongo(categoria , json)
+                else:
+                    json = {
+                        "_id": last,
+                        "url": url, 
+                        "nombre": nombre, 
+                        "tienda": tienda,
+                        fechaExtraccionclean : precio,
+                        "categoria": categoria,
+                        "subcategoria": subcategoria
+                    }
+                    busqueda  = BuscarMongo(categoria, last)
+                    respuesta = "null"
+                    if busqueda:
+                        respuesta  = UpdateMongo(categoria,json, fechaExtraccionclean)
+                    else:
+                        respuesta  = InsertarMongo(categoria , json)
+                print("<----------------------------------------->")
+            except:
+                print("<---------- EXCEPT EXCEPT EXCEPT---------->")
+        # self.driver.quit()
+        return 0
 
         # self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
         # print("4")
@@ -153,378 +214,4 @@ class reportingPalenca():
        
 
         
-        soup = BeautifulSoup(self.driver.page_source, 'html.parser')
-        
-        dom = etree.HTML(str(soup))
-        productos = dom.xpath("/html/body/div[25]/div/div[2]/div[8]/div[2]/div[2]/div[2]/div/ul/li")
-        for producto in productos:
-            print("producto",producto)
-            Nombre = producto.xpath('./div')
-            print("Nombre",Nombre)
-        
-        # print(soup)
-        # filtro1 = soup.find('div', {'class': 'product-shelf n18colunas'})
-        # print("feiltro1", filtro1)
-        # productos = filtro1.find_all('li', {'class': 'frutas-y-verduras'})
-
-
-        # 
-
-        # /html/body/div[25]/div/div[2]/div[8]/div[2]/div[2]/div[2]/div/ul
-        return 0
-        
-      
-        window_before = self.driver.window_handles[1]
-        self.driver.switch_to.window(window_before)
-        print("self.driver.window_handles[0],",  self.driver.window_handles)
-        print("window_before", window_before)
-        # print("self.driver.switch_to.window(window_before)", self.driver.switch_to.window(window_before))
-        print("antes de leer")
-
-        self.wait.until(ec.presence_of_element_located((By.XPATH, '/html/body/section/app-view/div/public-dashboard-page/div[1]/div[2]/dashboard-grid/div/div/div/dashboard-widget/div/div/div[2]/visualization-renderer/div/div/div/div/div/div/div/div/table/tbody/tr/td[12]')))
-        self.driver.find_element(By.XPATH, "/html/body/section/app-view/div/public-dashboard-page/div[1]/div[2]/dashboard-grid/div/div/div/dashboard-widget/div/div/div[2]/visualization-renderer/div/div/div/div/div/div/div/div/table/tbody/tr/td[12]").click()
-
-
-        self.driver.find_element(By.XPATH, "/html/body/section/app-view/div/public-dashboard-page/div[1]/div[2]/dashboard-grid/div/div/div/dashboard-widget/div/div/div[2]/visualization-renderer/div/div/div/div/div/div/div/div/table/tbody/tr/td[12]/a").click()
-        print("<-----------------------------------------   3er link  ----------------------------------------------->")
-
-        window_before = self.driver.window_handles[2]
-        self.driver.switch_to.window(window_before)
-        print("self.driver.window_handles,",  self.driver.window_handles)
-        print("window_before", window_before)
-        self.wait.until(ec.presence_of_element_located((By.XPATH, '/html/body/section/app-view/div/public-dashboard-page/div[1]/div[2]/dashboard-grid/div/div/div[2]/dashboard-widget/div/div/div[2]/visualization-renderer/div/div/div/div/div/div/div/div/table/tbody/tr/td[1]/img')))
-        self.wait.until(ec.presence_of_element_located((By.XPATH, '/html/body/section/app-view/div/public-dashboard-page/div[1]/div[2]/dashboard-grid/div/div/div[1]/dashboard-widget/div/div/div[2]/visualization-renderer/div/div/table/tbody')))
-
-        print("-----------------------------------------------------------      PERFILES      ------------------------------------------------------")
-        plataforma = self.driver.find_element(By.XPATH, "/html/body/section/app-view/div/public-dashboard-page/div[1]/div[2]/dashboard-grid/div/div/div[1]/dashboard-widget/div/div/div[2]/visualization-renderer/div/div/table/tbody/tr[8]/td").text
-        identificador = self.driver.find_element(By.XPATH, "/html/body/section/app-view/div/public-dashboard-page/div[1]/div[2]/dashboard-grid/div/div/div[1]/dashboard-widget/div/div/div[2]/visualization-renderer/div/div/table/tbody/tr[9]/td").text
-        nombres = self.driver.find_element(By.XPATH, "/html/body/section/app-view/div/public-dashboard-page/div[1]/div[2]/dashboard-grid/div/div/div[1]/dashboard-widget/div/div/div[2]/visualization-renderer/div/div/table/tbody/tr[1]/td").text
-        apellidos = self.driver.find_element(By.XPATH, "/html/body/section/app-view/div/public-dashboard-page/div[1]/div[2]/dashboard-grid/div/div/div[1]/dashboard-widget/div/div/div[2]/visualization-renderer/div/div/table/tbody/tr[2]/td").text
-        correo = self.driver.find_element(By.XPATH, "/html/body/section/app-view/div/public-dashboard-page/div[1]/div[2]/dashboard-grid/div/div/div[1]/dashboard-widget/div/div/div[2]/visualization-renderer/div/div/table/tbody/tr[3]/td").text
-        pais = self.driver.find_element(By.XPATH, "/html/body/section/app-view/div/public-dashboard-page/div[1]/div[2]/dashboard-grid/div/div/div[1]/dashboard-widget/div/div/div[2]/visualization-renderer/div/div/table/tbody/tr[7]/td").text
-        ciudad = self.driver.find_element(By.XPATH, "/html/body/section/app-view/div/public-dashboard-page/div[1]/div[2]/dashboard-grid/div/div/div[1]/dashboard-widget/div/div/div[2]/visualization-renderer/div/div/table/tbody/tr[6]/td").text   
-        prefijoTel = self.driver.find_element(By.XPATH, "/html/body/section/app-view/div/public-dashboard-page/div[1]/div[2]/dashboard-grid/div/div/div[1]/dashboard-widget/div/div/div[2]/visualization-renderer/div/div/table/tbody/tr[4]/td").text
-        telefono = self.driver.find_element(By.XPATH, "/html/body/section/app-view/div/public-dashboard-page/div[1]/div[2]/dashboard-grid/div/div/div[1]/dashboard-widget/div/div/div[2]/visualization-renderer/div/div/table/tbody/tr[5]/td").text
-        tipoIdentificacion = self.driver.find_element(By.XPATH, "/html/body/section/app-view/div/public-dashboard-page/div[1]/div[2]/dashboard-grid/div/div/div[1]/dashboard-widget/div/div/div[2]/visualization-renderer/div/div/table/tbody/tr[10]/td").text
-        numeroIdentificacion = self.driver.find_element(By.XPATH, "/html/body/section/app-view/div/public-dashboard-page/div[1]/div[2]/dashboard-grid/div/div/div[1]/dashboard-widget/div/div/div[2]/visualization-renderer/div/div/table/tbody/tr[11]/td").text
-        actualizado = self.driver.find_element(By.XPATH, "/html/body/section/app-view/div/public-dashboard-page/div[1]/div[2]/dashboard-grid/div/div/div[1]/dashboard-widget/div/div/div[2]/visualization-renderer/div/div/table/tbody/tr[12]/td").text
-
-      
-
-        
-
-        perfil={
-            "nombres": nombres,
-            "apellidos": apellidos,
-            "correo": correo,
-            "prefijoTel": prefijoTel,
-            "telefono": telefono,  
-            "ciudad": ciudad,
-            "pais": pais,
-            "plataforma": plataforma,
-            "identificador": identificador,
-            "tipoIdentificacion": tipoIdentificacion,
-            "numeroIdentificacion": numeroIdentificacion,
-            "actualizado": actualizado,            
-        }
-        responseGeneral={
-            "perfil":perfil,
-            # "datosTelefonicos": datosTelefonicos,
-            # "datosFamiliares": datosFamiliares,
-            # "direccionesRegistradas": direccionesRegistradas,
-            # "autosRegistrados": autosRegistrados,
-            # "resumenLaboral": resumenLaboral,
-            # "reporteCreditos":reporteCreditos,
-            # "detalleCreditos": detalleCreditos,
-        }
-        print("responseGeneral----->", responseGeneral)
-        self.driver.quit()
-        return responseGeneral
-        print()
-
-        print("----------------------------------------------------------------      TELEFONOS     ---------------------------------------------------")
-        condicionTelefonos=False
-        datosTelefonicos = []
-
-        try:
-            self.driver.find_element(By.XPATH, "/html/body/div[2]/div/div[1]/div/div/div/div/div/div[1]/div/div/div/div/div/div[4]/table/tbody/tr/td[2]")
-        except:
-            pass
-            condicionTelefonos=True 
-
-
-        if condicionTelefonos:
-            datosTelefonicos = ["No hay datos registrados"]
-            print("datosTelefonicos  ----->", datosTelefonicos)
-        else:
-            numerosRegistrados=self.driver.find_elements(By.XPATH, "/html/body/div[2]/div/div[1]/div/div/div/div/div/div[1]/div/div/div/div/div/div[4]/table/tbody/tr")
-            print("Elementos del arreglo de telefonos  --->", len(numerosRegistrados))
-            for numeros in numerosRegistrados:
-                numero = numeros.find_element(By.XPATH, './td[1]').text
-                print("TELEFONOS ---->",numero)
-                estado = numeros.find_element(By.XPATH, './td[2]').text
-                fechaValidacion = numeros.find_element(By.XPATH, './td[3]').text
-                fechaOrigen = numeros.find_element(By.XPATH, './td[4]').text
-                operador= numeros.find_element(By.XPATH, './td[5]/span').get_attribute('title')
-                datos={
-                    "numero": numero,
-                    "estado": estado,
-                    "fechaValidacion": fechaValidacion,
-                    "fechaOrigen": fechaOrigen,
-                    "operador": operador
-                }
-            
-                datosTelefonicos.append(datos)
-
-        print()
-        print("----------------------------------------------------------------      DATOS FAMILIARES     ---------------------------------------------------")
-        condicionFamiliares=False
-        datosFamiliares = []
-        try:
-            self.driver.find_element(By.XPATH, "/html/body/div[2]/div/div[1]/div/div/div/div/div/div[2]/div/div/div[1]/div/div[4]/div[2]/table/tbody/tr/td[2]")
-        except:
-            pass
-            condicionFamiliares=True 
-
-        if condicionFamiliares:
-            datosFamiliares = ["No hay datos registrados"]
-            print("datosFamiliares ----->", datosFamiliares)
-        else:
-            familiares=self.driver.find_elements(By.XPATH, "/html/body/div[2]/div/div[1]/div/div/div/div/div/div[2]/div/div/div[1]/div/div[4]/div[2]/table/tbody/tr")
-            print("Elementos del arreglo familiares  --->", len(familiares))
-            for familiar in familiares:
-                documentoFamiliar = familiar.find_element(By.XPATH, './td[1]').text
-                print("FAMILIARES ---->",documentoFamiliar)
-                apellidoPaterno = familiar.find_element(By.XPATH, './td[2]').text
-                apellidoMaterno = familiar.find_element(By.XPATH, './td[3]').text
-                nombres = familiar.find_element(By.XPATH, './td[4]').text
-                fechaNacimientoFamiliar= familiar.find_element(By.XPATH, './td[5]').text
-                edadFamiliar= familiar.find_element(By.XPATH, './td[6]').text
-                parentesco= familiar.find_element(By.XPATH, './td[7]').text
-                datos={
-                    "documentoFamiliar": documentoFamiliar,
-                    "apellidoPaterno": apellidoPaterno,
-                    "apellidoMaterno": apellidoMaterno,
-                    "nombres": nombres,
-                    "fechaNacimientoFamiliar": fechaNacimientoFamiliar,
-                    "edadFamiliar": edadFamiliar,
-                    "parentesco": parentesco,
-                }
-            
-                datosFamiliares.append(datos)
-        
-        
-        print()
-        print("----------------------------------------------------------------      DIRECCIONES     ---------------------------------------------------")
-        condicionDireccion=False
-        direccionesRegistradas = []
-        try:
-            self.driver.find_element(By.XPATH, "/html/body/div[2]/div/div[1]/div/div/div/div/div/div[2]/div/div/div[1]/div/div[1]/div[2]/table/tbody/tr/td[2]")
-        except:
-            pass
-            condicionDireccion=True
-
-        if condicionDireccion:
-            direccionesRegistradas["No hay datos registrados"]
-            print("direccionesRegistradas ---->", direccionesRegistradas)
-        else:
-            direcciones=self.driver.find_elements(By.XPATH, "/html/body/div[2]/div/div[1]/div/div/div/div/div/div[2]/div/div/div[1]/div/div[1]/div[2]/table/tbody/tr")
-            iterador=1
-            for direccion in direcciones:
-                print("ITERADOR DIRECCIONES---->", iterador)
-                direccionRegistrada = direccion.find_element(By.XPATH, './td[1]').text
-                departamento = direccion.find_element(By.XPATH, './td[2]').text
-                provincia = direccion.find_element(By.XPATH, './td[3]').text
-                distrito = direccion.find_element(By.XPATH, './td[4]').text
-                datos={
-                    "direccion": direccionRegistrada,
-                    "departamento": departamento,
-                    "provincia": provincia,
-                    "distrito": distrito
-                }
-                iterador=iterador+1
-                direccionesRegistradas.append(datos)
-
-
-
-        self.driver.refresh()
-        self.wait.until(ec.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div[1]/div/div/div/div/div/div[1]/div/div/div/div/figure')))
-
-        print()
-        print("----------------------------------------------------------------      AUTOS     ---------------------------------------------------")
-        condicionAuto=False
-        autosRegistrados = []
-        try:
-            self.driver.find_element(By.XPATH, "/html/body/div[2]/div/div[1]/div/div/div/div/div/div[2]/div/div/div[1]/div/div[5]/div[2]/table/tbody/tr/td[2]")
-        except:
-            pass
-            condicionAuto=True
-        if condicionAuto:
-            autosRegistrados = ["No hay datos registrados"]
-            print("autosRegistrados ---->", autosRegistrados)
-        else:
-            autos=self.driver.find_elements(By.XPATH, "/html/body/div[2]/div/div[1]/div/div/div/div/div/div[2]/div/div/div[1]/div/div[5]/div[2]/table/tbody/tr/td")
-            for auto in autos:
-                orden = auto.find_element(By.XPATH, './td[1]').text
-                marca = auto.find_element(By.XPATH, './td[2]').text
-                modelo = auto.find_element(By.XPATH, './td[3]').text
-                placa = auto.find_element(By.XPATH, './td[4]').text
-                fecha = auto.find_element(By.XPATH, './td[1]').text
-                tipoAuto = auto.find_element(By.XPATH, './td[2]').text
-                color = auto.find_element(By.XPATH, './td[3]').text
-                combustible = auto.find_element(By.XPATH, './td[4]').text
-                datos={
-                    "orden": orden,
-                    "marca": marca,
-                    "modelo": modelo,
-                    "placa": placa,
-                    "fecha": fecha,
-                    "tipoAuto": tipoAuto,
-                    "color": color,
-                    "combustible": combustible
-                }
-                autosRegistrados.append(datos)
-
-
-        self.driver.refresh()
-        self.wait.until(ec.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div[1]/div/div/div/div/div/div[1]/div/div/div/div/figure')))
-        self.driver.find_element(By.XPATH, "/html/body/div[2]/div/div[1]/div/div/div/div/div/div[2]/div/ul/li[2]/a").click()
-        print()
-        print("----------------------------------------------------------------      LABORAL      ---------------------------------------------------")
-        condicionLaboral=False
-        resumenLaboral = []
-        try:
-            self.driver.find_element(By.XPATH, "/html/body/div[2]/div/div[1]/div/div/div/div/div/div[2]/div/div/div[2]/div/div[1]/div[2]/table/tbody/tr[1]/td[2]")
-        except:
-            pass
-            condicionLaboral=True
-        
-        if condicionLaboral:
-            resumenLaboral=["No hay datos registrados"]
-            print("resumenLaboral---->", resumenLaboral)
-        else:
-            registrosSueldos=self.driver.find_elements(By.XPATH, "/html/body/div[2]/div/div[1]/div/div/div/div/div/div[2]/div/div/div[2]/div/div[1]/div[2]/table/tbody/tr")
-            for registrosSueldo in registrosSueldos:
-                orden = registrosSueldo.find_element(By.XPATH, './td[1]').text
-                print("ITERADOR LABORAL---->", orden)
-                fechaRegistro = registrosSueldo.find_element(By.XPATH, './td[2]').text
-                empresa = registrosSueldo.find_element(By.XPATH, './td[3]').text
-                ruc = registrosSueldo.find_element(By.XPATH, './td[4]').text
-                condicion = registrosSueldo.find_element(By.XPATH, './td[5]').text
-                sueldo = registrosSueldo.find_element(By.XPATH, './td[6]').text
-                datos={
-                    "orden": orden,
-                    "fechaRegistro": fechaRegistro,
-                    "empresa": empresa,
-                    "RUC": ruc,
-                    "condicion": condicion,
-                    "sueldo": sueldo,
-                    
-                }
-                resumenLaboral.append(datos)
-
-        self.driver.refresh()
-        self.wait.until(ec.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div[1]/div/div/div/div/div/div[1]/div/div/div/div/figure')))
-        self.driver.find_element(By.XPATH, "/html/body/div[2]/div/div[1]/div/div/div/div/div/div[2]/div/ul/li[2]/a").click()
-
-
-        print()
-        print("----------------------------------------------------------      DETALLE CREDITICIO      ---------------------------------------------")
-        condicionDetalle=False
-        detalleCreditos = []
-        try:
-            self.driver.find_element(By.XPATH, "/html/body/div[2]/div/div[1]/div/div/div/div/div/div[2]/div/div/div[2]/div/div[2]/div[6]/table/tbody/tr[1]/td[2]")
-        except:
-            pass
-            condicionDetalle=True
-        if condicionDetalle:
-            detalleCreditos=["No hay datos registrados"]
-            print("detalleCreditos---->", detalleCreditos)
-        else:
-            detalleCrediticios = self.driver.find_elements(By.XPATH, "/html/body/div[2]/div/div[1]/div/div/div/div/div/div[2]/div/div/div[2]/div/div[2]/div[6]/table/tbody/tr")
-            for detalleCrediticio in detalleCrediticios:
-                orden = detalleCrediticio.find_element(By.XPATH, './td[1]').text
-                print("ITERADOR DETALLE DE CREDITOS---->", orden)
-                entidadFinanciera = detalleCrediticio.find_element(By.XPATH, './td[2]').text
-                tipoProducto = detalleCrediticio.find_element(By.XPATH, './td[3]').text
-                monto = detalleCrediticio.find_element(By.XPATH, './td[4]').text
-                calificacion = detalleCrediticio.find_element(By.XPATH, './td[5]').text
-                datos={
-                    "orden": orden,
-                    "entidadFinanciera": entidadFinanciera,
-                    "tipoProducto": tipoProducto,
-                    "monto": monto,
-                    "calificacion": calificacion,
-                }
-                detalleCreditos.append(datos)
-
-
-        print()
-        print("----------------------------------------------------------      REPORTE CREDITICIO      ---------------------------------------------")
-        condicionReporte=False
-        reporteCreditos = []
-        try:
-            self.driver.find_element(By.XPATH, "/html/body/div[2]/div/div[1]/div/div/div/div/div/div[2]/div/div/div[2]/div/div[2]/div[2]/table/tbody/tr/td[2]")
-        except:
-            pass
-            condicionReporte=True
-        
-        if condicionReporte:
-            reporteCreditos=["No hay datos registrados"]
-            print("resumenLaboral---->", reporteCreditos)
-        else:
-            reporteCrediticios = self.driver.find_elements(By.XPATH, "/html/body/div[2]/div/div[1]/div/div/div/div/div/div[2]/div/div/div[2]/div/div[2]/div[2]/table/tbody/tr")
-            for reporteCrediticio in reporteCrediticios:
-                orden = reporteCrediticio.find_element(By.XPATH, './td[1]').text
-                print("ITERADOR REPORTE DE CREDITOS---->", orden)
-                fechaReporte = reporteCrediticio.find_element(By.XPATH, './td[2]').text
-                entFinancieras = reporteCrediticio.find_element(By.XPATH, './td[3]').text
-                calNormal = reporteCrediticio.find_element(By.XPATH, './td[4]').text
-                calCPP = reporteCrediticio.find_element(By.XPATH, './td[5]').text
-                calDeficiente = reporteCrediticio.find_element(By.XPATH, './td[6]').text
-                calDudoso = reporteCrediticio.find_element(By.XPATH, './td[7]').text
-                calPerdida = reporteCrediticio.find_element(By.XPATH, './td[8]').text
-
-                datos={
-                    "orden": orden,
-                    "fechaReporte": fechaReporte,
-                    "entFinancieras": entFinancieras,
-                    "calNormal": calNormal,
-                    "calCPP": calCPP,
-                    "calDeficiente": calDeficiente,
-                    "calDudoso": calDudoso,
-                    "calPerdida": calPerdida,
-                }
-                reporteCreditos.append(datos)
-        print("--------------------------------------------------------- FIN LECTURAS  ------------------------------------------------------------")
-
-        print()
-        print("<------ datosPersonales ------>")
-        print(datosPersonales)
-        print()
-        print("<------ datosTelefonicos ------>")
-        print(datosTelefonicos)
-        print()
-        print("<------ direccionesRegistradas ------>")
-        print(direccionesRegistradas)
-        print()
-        print("<------ datosFamiliares ------>")
-        print(datosFamiliares)
-        print()
-        print("<------ autosRegistrados ------>")
-        print(autosRegistrados)
-        print()
-        print("<------ resumenLaboral ------>")
-        print(resumenLaboral)
-        print()
-        print("<------ reporteCreditos ------>")
-        print(reporteCreditos)
-        print()
-        print("<------ detalleCreditos ------>")
-        print(detalleCreditos)
-        print()
-        
-        
-
-
-        
+     

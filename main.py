@@ -39,9 +39,11 @@ def scrapers(tipo):
         print("en esta ruta")
         if request.method == 'POST':
             global created
-            print("reporting" )
             json = request.get_json()
-            print("json", json)
+            abriendo = json["ruta"]
+            cadena = abriendo.split("/")
+            tienda = cadena[2]
+            print("TIENDA", tienda)            
             buscar = "null"
             # getFecha = loads(buscar)
             # try:
@@ -50,68 +52,53 @@ def scrapers(tipo):
             #     print("created", created)
             # except:
             #     created = 3
-            if buscar == 'null':
+            if tienda == 'www.wong.pe':
+                print("<--------------------------- INICIO ESCRAPING WON ------------------------->")
                 inicio = reportingPalenca(json["ruta"]) 
                 try:
                     response = inicio.logica()
-                    print("<response  ----------------------------------->", response )
-                    json={
-                        "codRes": "00",
-                        "usuario": "ssssssssssssssssss",
-                        "created_at": datetime.now(),
-                        "detalle": response
-                    }
-                    print("<json  ------------------------------------------>", json )
-                    print("antes de isertar")
-                    return dumps(json)
+                    if response == 0:
+                        json={
+                            "codRes": "00",
+                            "detalle": "Se hizo el scraping de manera correcta",
+                            "return": response,
+                            "url": json["ruta"]
+                        }
+                        return dumps(json)
                 except: 
                     json={
                         "codRes": "99",
-                        "documento": json["usuario"],
-                        "detalle": ["Hubo un error en el proceso"]
+                        "detalle": "Hubo un error",
+                        "detalle": "",
+                        "url": json["ruta"]
                     }
-                    return json
-            else:
-                return buscar
-        
-    elif tipo == 2:
-        print("TIPO CAMBIO")
-        if request.method == 'POST':
-            global created
-            print("reporting" )
-            json = request.get_json()
-            print("json", json)
-            buscar = "null"
-            # getFecha = loads(buscar)
-            # try:
-            #     print("entramos al try")
-            #     # created = diferenviaDias(getFecha['created_at'])
-            #     print("created", created)
-            # except:
-            #     created = 3
-            if buscar == 'null':
+                    return dumps(json)
+
+            if tienda == 'www.metro.pe':
+                print("<--------------------------- INICIO ESCRAPING METRO ------------------------->")
                 inicio = reportingMetro(json["ruta"]) 
                 try:
                     response = inicio.logica()
-                    print("<response  ----------------------------------->", response )
-                    json={
-                        "codRes": "00",
-                        "usuario": "ssssssssssssssssss",
-                        "created_at": datetime.now(),
-                        "detalle": response
-                    }
-                    print("<json  ------------------------------------------>", json )
-                    print("antes de isertar")
-                    return dumps(json)
+                    if response == 0:
+                        json={
+                            "codRes": "00",
+                            "detalle": "Se hizo el scraping de manera correcta",
+                            "return": response,
+                            "url": json["ruta"]
+                        }
+                        return dumps(json)
                 except: 
                     json={
                         "codRes": "99",
-                        "documento": json["usuario"],
-                        "detalle": ["Hubo un error en el proceso"]
+                        "detalle": "Hubo un error",
+                        "detalle": "",
+                        "url": json["ruta"]
                     }
-                    return json
+                    return dumps(json)
             else:
                 return buscar
+    elif tipo == 2:
+        print("opcion 2")
     else:
         return 'Tipo incorrecto'
         # return todas(json_forma)
