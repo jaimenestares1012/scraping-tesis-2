@@ -185,7 +185,8 @@ class reportingPalenca():
                 print("<----------------------------------------->")
             except:
                 print("<---------- EXCEPT EXCEPT EXCEPT---------->")
-        # self.driver.quit()
+        self.driver.quit()
+        # 
         return 0
 
         # self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
