@@ -13,8 +13,12 @@ from selenium.webdriver.support import expected_conditions as ec
 from pymongo import MongoClient
 
 
-client = MongoClient("mongodb+srv://user_jaime:XhA7pqTDWKfQy6Nh@micluster.pns9q58.mongodb.net")
-db  = client.get_database("tesis-metro")
+# client = MongoClient("mongodb+srv://user_jaime:XhA7pqTDWKfQy6Nh@micluster.pns9q58.mongodb.net")
+# db  = client.get_database("tesis-metro")
+
+cliente=MongoClient('localhost')
+db=cliente['tesis-metro']
+
 
 def BuscarMongo(coleccion ,valor):
     col = db[coleccion]
@@ -178,7 +182,6 @@ class reportingMetro():
                     print("respuesta", respuesta)
                 else:
                     respuesta  = InsertarMongo(categoria , json)
-                print("respuesta", respuesta)
             except:
                 print("<------------------- ERROR ERROR ERROR ERROR ------------------------->")
         self.driver.quit()

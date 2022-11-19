@@ -17,9 +17,13 @@ from selenium.webdriver.support import expected_conditions as ec
 from pymongo import MongoClient
 
 
-client = MongoClient("mongodb+srv://user_jaime:XhA7pqTDWKfQy6Nh@micluster.pns9q58.mongodb.net")
+# client = MongoClient("mongodb+srv://user_jaime:XhA7pqTDWKfQy6Nh@micluster.pns9q58.mongodb.net")
 
-db  = client.get_database("tesis-won")
+# db  = client.get_database("tesis-won")
+
+cliente=MongoClient('localhost')
+db=cliente['tesis-won']
+
 
 def BuscarMongo(coleccion ,valor):
     col = db[coleccion]

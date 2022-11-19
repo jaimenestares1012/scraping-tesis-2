@@ -22,6 +22,8 @@ from palenca import reportingPalenca
 
 from metro import reportingMetro
 
+from tottus import reportingTottus
+
 # client = MongoClient()
 # mongo = MongoClient(os.getenv("URL_MONGO"))
 
@@ -77,6 +79,31 @@ def scrapers(tipo):
             if tienda == 'www.metro.pe':
                 print("<--------------------------- INICIO ESCRAPING METRO ------------------------->")
                 inicio = reportingMetro(json["ruta"]) 
+                try:
+                    response = inicio.logica()
+                    if response == 0:
+                        json={
+                            "codRes": "00",
+                            "detalle": "Se hizo el scraping de manera correcta",
+                            "return": response,
+                            "url": json["ruta"]
+                        }
+                        return dumps(json)
+                except: 
+                    json={
+                        "codRes": "99",
+                        "detalle": "Hubo un error",
+                        "detalle": "",
+                        "url": json["ruta"]
+                    }
+                    return dumps(json)
+            
+
+
+
+            if tienda == "www.tottus.com.pe":
+                print("cd")
+                inicio = reportingTottus(json["ruta"]) 
                 try:
                     response = inicio.logica()
                     if response == 0:
