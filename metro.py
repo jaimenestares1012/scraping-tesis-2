@@ -24,14 +24,12 @@ def BuscarMongo(coleccion ,valor):
     col = db[coleccion]
     try:
         id = col.find_one({"_id": valor})
-        print("id", id)
         return id
     except NameError:
         print("ERROR")
         print(NameError)
 
 def UpdateMongo(coleccion, valor, fechaExtraccionclean):
-    print("update", fechaExtraccionclean)
     col = db[coleccion]
     try:
         col.update_one({
@@ -45,9 +43,10 @@ def UpdateMongo(coleccion, valor, fechaExtraccionclean):
                 fechaExtraccionclean : valor[fechaExtraccionclean],
             }
         }, upsert=True)
+        print("Update Correct - Metro", valor)
         return True
     except NameError:
-        print("ERROR")
+        print("ERROR UPDATE")
         print(NameError)
         return False
 
@@ -56,12 +55,11 @@ def UpdateMongo(coleccion, valor, fechaExtraccionclean):
 def InsertarMongo(coleccion ,valor):
     col = db[coleccion]
     try:
-        print("InsertarMongo", valor)
         id = col.insert_one(valor)
-        print("Seguardo correctamente")
+        print("Insert Correct - Metro", valor)
         return id
     except NameError:
-        print("ERROR")
+        print("ERROR INSERT")
         print(NameError)
         
 
@@ -69,7 +67,7 @@ class reportingMetro():
     def __init__(self, objs):
         print(objs)
         self.objs = objs
-        self.driver = webdriver.Remote(command_executor="http://192.168.44.101:4444/wd/hub", desired_capabilities=DesiredCapabilities.CHROME)
+        self.driver = webdriver.Remote(command_executor="http://192.168.54.215:4444/wd/hub", desired_capabilities=DesiredCapabilities.CHROME)
         self.vars = {}
         self.wait = WebDriverWait(self.driver, 10)
 
@@ -84,6 +82,7 @@ class reportingMetro():
 
 
         try:
+            time.sleep(10)
             print("click cookis")
             self.wait.until(ec.presence_of_element_located((By.XPATH, '/html/body/div[29]/div/div[3]/button[1]')))
             self.driver.find_element(By.XPATH, "/html/body/div[29]/div/div[3]/button[1]").click()
@@ -123,16 +122,12 @@ class reportingMetro():
             self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
             estado = self.driver.find_element(By.XPATH, "/html/body/div[26]/div/div[2]/div[7]/div[1]").get_attribute('style')
             repeticion = estado.split()[1]
-            print("bajando")
             if repeticion == "none;":
                 self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
                 time.sleep(1)
                 self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
                 estado = self.driver.find_element(By.XPATH, "/html/body/div[26]/div/div[2]/div[7]/div[1]").get_attribute('style')
                 repeticion = estado.split()[1]
-                print("bajando sigue")
-        print("FIN DE BAJAR")
-        print("<------------------------------------------------------>")
 
         
         productos = self.driver.find_elements(By.XPATH, "/html/body/div[26]/div/div[2]/div[7]/div[2]/div[2]/div[2]/div/ul/li")
@@ -143,7 +138,6 @@ class reportingMetro():
         fechaExtraccion2 = fechaExtraccion.split(" ")
         fechaExtraccionclean = fechaExtraccion2[0]
         cadena = abriendo.split("/")
-        print("CADENA", cadena)
         tienda = cadena[2]
         categoria = cadena[3]
         subcategoria = ""
@@ -177,13 +171,11 @@ class reportingMetro():
                 }
                 busqueda  = BuscarMongo(categoria, data_id)
                 if busqueda:
-                    print("existe data")
-                    respuesta  = UpdateMongo(categoria,json, fechaExtraccionclean)
-                    print("respuesta", respuesta)
+                    UpdateMongo(categoria,json, fechaExtraccionclean)
                 else:
-                    respuesta  = InsertarMongo(categoria , json)
+                    InsertarMongo(categoria , json)
             except:
-                print("<------------------- ERROR ERROR ERROR ERROR ------------------------->")
+                print("")
         self.driver.quit()
         return 0
         

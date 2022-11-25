@@ -47,7 +47,7 @@ def UpdateMongo(coleccion, valor, fechaExtraccionclean):
                 fechaExtraccionclean: valor[fechaExtraccionclean], 
             }
         }, upsert=True)
-        print("Se actualizo correctamente")
+        print("Update Correct - Wong", valor)
         return True
     except NameError:
         print("ERROR")
@@ -58,9 +58,8 @@ def UpdateMongo(coleccion, valor, fechaExtraccionclean):
 def InsertarMongo(coleccion ,valor):
     col = db[coleccion]
     try:
-        print("InsertarMongo", valor)
         id = col.insert_one(valor)
-        print("Seguardo correctamente")
+        print("Insert Correct - Wong", valor)
         return id
     except NameError:
         print("ERROR")
@@ -82,7 +81,7 @@ class reportingPalenca():
         self.driver.get(self.objs)
         self.driver.maximize_window()        
         try:
-            time.sleep(5)
+            time.sleep(20)
             self.wait.until(ec.presence_of_element_located((By.XPATH, '/html/body/div[5]/div/div[3]/button[1]')))
             self.driver.find_element(By.XPATH, "/html/body/div[5]/div/div[3]/button[1]").click()
             time.sleep(5)
@@ -95,7 +94,6 @@ class reportingPalenca():
         asea = numer.split(' ')
         print(asea[0], type(int(float(asea[0]))))
         iteraciones  =  int(float(asea[0])) / 20
-        print(iteraciones, "iteraciones")
         iteraciones = int(iteraciones) + 2
         print("se dará ", iteraciones, "iteraciones")
         c=0
@@ -167,9 +165,9 @@ class reportingPalenca():
                     busqueda  = BuscarMongo(categoria, last2)
                     respuesta = "null"
                     if busqueda:
-                        respuesta  = UpdateMongo(categoria,json, fechaExtraccionclean)
+                        UpdateMongo(categoria,json, fechaExtraccionclean)
                     else:
-                        respuesta  = InsertarMongo(categoria , json)
+                        InsertarMongo(categoria , json)
                 else:
                     json = {
                         "_id": last,
@@ -188,7 +186,7 @@ class reportingPalenca():
                         respuesta  = InsertarMongo(categoria , json)
                 print("<----------------------------------------->")
             except:
-                print("<---------- EXCEPT EXCEPT EXCEPT---------->")
+                print("")
         self.driver.quit()
         # 
         return 0
