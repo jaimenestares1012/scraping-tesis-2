@@ -41,6 +41,7 @@ def UpdateMongo(coleccion, valor, fechaExtraccionclean):
                 fechaExtraccionclean : valor[fechaExtraccionclean],
             }
         }, upsert=True)
+        print("Update Correct - Tottus", valor)
         return True
     except NameError:
         print("ERROR")
@@ -53,6 +54,7 @@ def InsertarMongo(coleccion ,valor):
     col = db[coleccion]
     try:
         id = col.insert_one(valor)
+        print("Insert Correct - tottus", valor)
         return id
     except NameError:
         print("ERROR")
@@ -76,9 +78,8 @@ class reportingTottus():
         condicion = "next"
         it = 1
         while( condicion == "next" ):
-            print("<------------- INICIO DE NUEVO CICLO --------------------->")
             try:
-                time.sleep(3)
+                time.sleep(10)
                 filas = self.driver.find_elements(By.XPATH, "/html/body/div[1]/section/div[1]/section/div[1]/div[3]/ul/li")
                 utlimo = filas.pop()
                 condicion = utlimo.get_attribute('class')
@@ -140,15 +141,12 @@ class reportingTottus():
                         "subcategoria": subcategoria
                     }
                     busqueda  = BuscarMongo(categoria, data_id)
-                    print("producto Name-->", nombre)
                     if busqueda:
-                        print("updatea")
-                        respuesta  = UpdateMongo(categoria,json, fechaExtraccionclean)
+                        UpdateMongo(categoria,json, fechaExtraccionclean)
                     else:
-                        print("crea")
-                        respuesta  = InsertarMongo(categoria , json)
+                        InsertarMongo(categoria , json)
                 except:
-                    print("<------------------- ERROR ERROR ERROR ERROR ------------------------->")
+                    print("")
             
                 it = it + 1
             try:
@@ -158,7 +156,6 @@ class reportingTottus():
                 try:
                     self.wait.until(ec.presence_of_element_located((By.XPATH, '/html/body/div[5]/div/div/div[2]/button[2]'))) 
                     self.driver.find_element(By.XPATH, "/html/body/div[5]/div/div/div[2]/button[2]").click()
-                    print("el click exisye")
                 except:
                     pass
                 utlimo.click()

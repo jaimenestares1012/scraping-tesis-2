@@ -16,6 +16,7 @@ from unicodedata import normalize
 from flask import Flask, request
 
 from datetime import datetime
+import time
 
 
 from palenca import reportingPalenca
@@ -40,23 +41,17 @@ from reporting import reporteTipo1
 
 @app.route('/scrapers/<int:tipo>', methods=['GET', 'POST'])
 def scrapers(tipo):
+    print("inico sleep")
+    time.sleep(5)
+    print("fin sleep")
     if tipo == 1:
-        print("en esta ruta")
         if request.method == 'POST':
             global created
             json = request.get_json()
             abriendo = json["ruta"]
             cadena = abriendo.split("/")
-            tienda = cadena[2]
-            print("TIENDA", tienda)            
+            tienda = cadena[2]         
             buscar = "null"
-            # getFecha = loads(buscar)
-            # try:
-            #     print("entramos al try")
-            #     # created = diferenviaDias(getFecha['created_at'])
-            #     print("created", created)
-            # except:
-            #     created = 3
             if tienda == 'www.wong.pe':
                 print("<--------------------------- INICIO ESCRAPING WON ------------------------->")
                 inicio = reportingPalenca(json["ruta"]) 
@@ -105,7 +100,8 @@ def scrapers(tipo):
 
 
             if tienda == "www.tottus.com.pe":
-                print("cd")
+                print("<--------------------------- INICIO ESCRAPING TOTTUS ------------------------->")
+                
                 inicio = reportingTottus(json["ruta"]) 
                 try:
                     response = inicio.logica()
@@ -132,7 +128,6 @@ def scrapers(tipo):
         print("opcion 2")
     else:
         return 'Tipo incorrecto'
-        # return todas(json_forma)
 
 @app.route('/get/data/<int:tipo>', methods=['GET', 'POST'])
 def getData(tipo):
