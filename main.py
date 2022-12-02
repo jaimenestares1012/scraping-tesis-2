@@ -24,6 +24,9 @@ from metro import reportingMetro
 
 from tottus import reportingTottus
 
+
+from reporting import reporteTipo1
+
 # client = MongoClient()
 # mongo = MongoClient(os.getenv("URL_MONGO"))
 
@@ -106,6 +109,7 @@ def scrapers(tipo):
                 inicio = reportingTottus(json["ruta"]) 
                 try:
                     response = inicio.logica()
+                   
                     if response == 0:
                         json={
                             "codRes": "00",
@@ -130,6 +134,25 @@ def scrapers(tipo):
         return 'Tipo incorrecto'
         # return todas(json_forma)
 
+@app.route('/get/data/<int:tipo>', methods=['GET', 'POST'])
+def getData(tipo):
+    if tipo == 1:
+        print("es tipo 1", tipo)
+        json = request.get_json()
+        producto = json["nombreProducto"]
+        categoria = json["categoria"]
+        inicio = reporteTipo1( producto, categoria) 
+        datos = inicio.logica()
+        data={
+            "codRes": "00",
+            "detalle": "éxito",
+            "data": datos
+        }
+        return data
+    elif tipo == 2:
+        print("tipo 2")
+    else:
+        return "tipo incorrecto"
 
 try:
     enviro = sys.argv[1]
